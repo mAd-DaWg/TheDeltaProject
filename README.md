@@ -12,4 +12,11 @@ How to compile:
 2. Set the Active configuration to Release
 3. From the build menu, choose build.
 
-Note to linux users: Makefiles for compiling the project will be implemented at a later stage, for now please Compile the project using Monodevelop.
+Note to linux users:  Makefiles for compiling the project will be implemented at a later stage, 
+                      for now please Compile the project using Monodevelop.
+
+How to run:
+On Linux: right-click on the binary(bin/Release/TheDeltaProject.exe) and select the option similar to 
+          "Open with Monodevelop console".
+
+On Windows: double-click on the binary(bin\Release\TheDeltaProject.exe)
