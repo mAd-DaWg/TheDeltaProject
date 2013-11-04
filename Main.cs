@@ -18,13 +18,7 @@ namespace TheDeltaProject
 	{
 		public static void Main (string[] args)
 		{
-			//basic intro**************************************
-			Console.WriteLine ("Welcome to the Delta Project!");
-			Console.WriteLine ("+++++++++++++++++++++++++++++++++++++++++++++++");
-			Console.WriteLine ("We are still in the early phases of development");
-			Console.WriteLine ("Type help for a list of commands");
-			Console.WriteLine ("+++++++++++++++++++++++++++++++++++++++++++++++");
-			//*************************************************
+			printIntro ();
 
 
 			//deals with arguments passed to the program at startup i.e.: thedeltaproject <command>
@@ -93,13 +87,13 @@ namespace TheDeltaProject
 					}
 					else
 					{
-						Console.WriteLine ("Command \"" + command + "\" is not recognised, type help for a list of commands");
+						printCommandNotRecognised(command);
 						Console.WriteLine();
 					}
 				}
 				else//if the command is not listed above
 				{
-					Console.WriteLine ("Command \"" + command + "\" is not recognised, type help for a list of commands");
+					printCommandNotRecognised(command);
 					Console.WriteLine();
 				}
 			}
@@ -118,12 +112,12 @@ namespace TheDeltaProject
 				}
 				else//if the next command is not a string, echo something anyway
 				{
-					Console.WriteLine("The System trembles as the echo of \"nothing\" shakes its very binary...");
+					printEmptyString ();
 				}
             }
             catch//if no string was found directly after the -e argument, echo something anyway
             {
-                Console.WriteLine("The System trembles as the echo of \"nothing\" shakes its very binary...");
+				printEmptyString ();
             }
         }
 
@@ -138,7 +132,7 @@ namespace TheDeltaProject
 			} 
 			else 
 			{
-				Console.WriteLine ("The System trembles as the echo of \"nothing\" shakes its very binary...");
+				printEmptyString ();
 				Console.WriteLine();
 			}
 		}
@@ -155,5 +149,26 @@ namespace TheDeltaProject
 			Console.WriteLine("                                Networks. To be issued while running the ");
 			Console.WriteLine("                                program terminal.");
         }
+
+		private static void printIntro ()
+		{
+			//basic intro
+			Console.WriteLine ("Welcome to the Delta Project!");
+			Console.WriteLine ("+++++++++++++++++++++++++++++++++++++++++++++++");
+			Console.WriteLine ("We are still in the early phases of development");
+			Console.WriteLine ("Type help for a list of commands");
+			Console.WriteLine ("+++++++++++++++++++++++++++++++++++++++++++++++");
+		}
+
+		private static void printEmptyString ()
+		{
+			Console.WriteLine("The System trembles as the echo of \"nothing\" shakes its very binary...");
+		}
+
+		private static void printCommandNotRecognised (string command)
+		{
+			Console.WriteLine ("Command \"" + command + "\" is not recognised, type help for a list of commands");
+		}
+
 	}
 }
