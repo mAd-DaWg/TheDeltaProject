@@ -4,7 +4,7 @@ using System;
 
 namespace TheDeltaProject.Brain
 {
-    class Brain
+    class Cranium
     {
         //public static Database neuralStateStorage = new Database();
     }

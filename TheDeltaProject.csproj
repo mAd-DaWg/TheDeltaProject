@@ -5,10 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>10.0.0</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{FAB50F97-636B-4684-B14A-80D858335DAB}</ProjectGuid>
+    <ProjectGuid>{4949CDB1-CAD7-4A47-A080-B7BA1514451A}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>TheDeltaProject</RootNamespace>
     <AssemblyName>TheDeltaProject</AssemblyName>
+    <StartupObject>TheDeltaProject.MainClass</StartupObject>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
@@ -44,13 +45,37 @@
     <Compile Include="Brain\NeuralNetwork\NeuralNet.cs" />
     <Compile Include="Brain\NeuralNetwork\NeuralSynapse.cs" />
     <Compile Include="Brain\NeuralNetwork\Neuron.cs" />
-    <Compile Include="Brain\Brain.cs" />
-    <Compile Include="BrokenOldCode\Database.cs" />
+    <Compile Include="Tests\NeuralNetTest.cs" />
+    <Compile Include="Brain\Cranium.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
     <Folder Include="Brain\" />
     <Folder Include="Brain\NeuralNetwork\" />
-    <Folder Include="BrokenOldCode\" />
+    <Folder Include="Tests\" />
   </ItemGroup>
+  <ProjectExtensions>
+    <MonoDevelop>
+      <Properties>
+        <Policies>
+          <TextStylePolicy inheritsSet="null" scope="text/x-csharp" />
+          <CSharpFormattingPolicy inheritsSet="Mono" inheritsScope="text/x-csharp" scope="text/x-csharp" />
+          <TextStylePolicy FileWidth="120" TabsToSpaces="False" inheritsSet="VisualStudio" inheritsScope="text/plain" scope="text/plain" />
+          <TextStylePolicy inheritsSet="null" scope="text/x-markdown" />
+        </Policies>
+        <MonoDevelop.Autotools.MakefileInfo RelativeMakefileName="Makefile" SyncReferences="true">
+          <BuildFilesVar Sync="true" Name="FILES" />
+          <DeployFilesVar />
+          <ResourcesVar Sync="true" Name="RESOURCES" />
+          <OthersVar />
+          <GacRefVar Sync="true" Name="REFERENCES" />
+          <AsmRefVar Sync="true" Name="REFERENCES" />
+          <ProjectRefVar Sync="true" Name="REFERENCES" />
+        </MonoDevelop.Autotools.MakefileInfo>
+      </Properties>
+    </MonoDevelop>
+  </ProjectExtensions>
 </Project>
