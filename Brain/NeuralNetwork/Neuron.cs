@@ -6,10 +6,10 @@ namespace TheDeltaProject.Brain.NeuralNetwork
 {
     class Neuron
     {
-        private NeuralSynapse[] m_input;
+        private NeuralSynapse[] m_input;//used for the connections between each neuron
         double m_output, m_error, m_lastError;
-        int m_ID;
-        NeuralFactor m_bias;
+        int m_ID;//the neurons Identification number, this makes it easier to save each neurons state to a database
+        NeuralFactor m_bias;//the neurons bias
 
 		//constructor. requires (id for the neuron, the bias of the neuron)
         public Neuron(int ID, double bias)
@@ -32,7 +32,7 @@ namespace TheDeltaProject.Brain.NeuralNetwork
             get { return m_ID; }
         }
 
-		//provides access to the neurons synapse input
+		//provides access to the neurons synapse input, which is populated at the initialiazation of the neural network
         public NeuralSynapse[] Input
         {
             get { return m_input; }
@@ -57,7 +57,7 @@ namespace TheDeltaProject.Brain.NeuralNetwork
             }
         }
 
-		//provides access to the last error on the output that the neuron had
+		//provides access to the last error on the output that the neuron had(i.e how wrong it was on its last calculation)
         public double LastError
         {
             get { return m_lastError; }
@@ -95,7 +95,7 @@ namespace TheDeltaProject.Brain.NeuralNetwork
 
                 for (int i = 0; i < m_input.Length; i++)//loop for each synapse
                 {
-                    m_output += m_input[i].Mother.Output * m_input[i].synapseWeight.Weight;//add up(all the input synapses in total) the sum of the input signal to the synapse and the synapses weighting
+                    m_output += m_input[i].Mother.Output * m_input[i].synapseWeight.Weight;//add up(all the input synapses in total) the sum of the input signal to the Neuron via the synapse and the synapses weighting
                 }
 
                 m_output += m_bias.Weight;//apply the neurons biasing to the output signal
