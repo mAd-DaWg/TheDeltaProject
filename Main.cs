@@ -150,7 +150,7 @@ namespace TheDeltaProject
 			Console.WriteLine("                                program terminal.");
         }
 
-		private static void printIntro ()
+		public static void printIntro ()
 		{
 			//basic intro
 			Console.WriteLine ("Welcome to the Delta Project!");

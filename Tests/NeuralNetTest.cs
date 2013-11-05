@@ -286,13 +286,7 @@ namespace TheDeltaProject.Tests
 					quit = true;
 					Console.Clear();
 					//for asthetic sakes
-					//basic intro**************************************
-					Console.WriteLine ("Welcome to the Delta Project!");
-					Console.WriteLine ("+++++++++++++++++++++++++++++++++++++++++++++++");
-					Console.WriteLine ("We are still in the early phases of development");
-					Console.WriteLine ("Type help for a list of commands");
-					Console.WriteLine ("+++++++++++++++++++++++++++++++++++++++++++++++");
-					//*************************************************
+                    MainClass.printIntro();
 				}
 			}
 		}
