@@ -28,14 +28,14 @@ namespace TheDeltaProject.Tests
 			Console.WriteLine ("--------------------------------------------------------");
 			Console.WriteLine ("1  XOR - Trains the network to a basic logic function");
 			Console.WriteLine ("         Used to test network convergance and accuracy.");
-			Console.WriteLine ();
-            Console.WriteLine ("2  NOR - Trains the network to a basic logic function");
-            Console.WriteLine ("         Used to test network convergance and accuracy.");
-            Console.WriteLine("         Currently broken, use ctrl+c to quit");
-            Console.WriteLine ();
-            Console.WriteLine ("3  XNOR - Trains the network to a basic logic function");
-            Console.WriteLine ("         Used to test network convergance and accuracy.");
-            Console.WriteLine("         Currently broken, use ctrl+c to quit");
+            //Console.WriteLine ();
+            //Console.WriteLine ("2  NOR - Trains the network to a basic logic function");
+            //Console.WriteLine ("         Used to test network convergance and accuracy.");
+            //Console.WriteLine("         Currently broken, use ctrl+c to quit");
+            //Console.WriteLine ();
+            //Console.WriteLine ("3  XNOR - Trains the network to a basic logic function");
+            //Console.WriteLine ("         Used to test network convergance and accuracy.");
+            //Console.WriteLine("         Currently broken, use ctrl+c to quit");
 			Console.WriteLine ("--------------------------------------------------------");
 
 			while(true)
