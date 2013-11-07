@@ -89,13 +89,11 @@ namespace TheDeltaProject
 					else
 					{
 						printCommandNotRecognised(command);
-						//Console.WriteLine();
 					}
 				}
 				else//if the command is not listed above
 				{
 					printCommandNotRecognised(command);
-					//Console.WriteLine();
 				}
 			}
 		}//end of commandLineMode()
@@ -113,12 +111,12 @@ namespace TheDeltaProject
 				}
 				else//if the next command is not a string, echo something anyway
 				{
-					printEmptyString ();
+					printStringEmpty ();
 				}
             }
             catch//if no string was found directly after the -e argument, echo something anyway
             {
-				printEmptyString ();
+				printStringEmpty ();
             }
         }
 
@@ -129,12 +127,10 @@ namespace TheDeltaProject
 			if (echoString.Length > 0) 
 			{
 				Console.WriteLine (echoString);
-				Console.WriteLine();
 			} 
 			else 
 			{
-				printEmptyString ();
-				Console.WriteLine();
+				printStringEmpty ();
 			}
 		}
 
@@ -164,7 +160,7 @@ namespace TheDeltaProject
 			Console.WriteLine ("+++++++++++++++++++++++++++++++++++++++++++++++");
 		}
 
-		private static void printEmptyString ()
+		private static void printStringEmpty ()
 		{
 			Console.WriteLine("The System trembles as the echo of \"nothing\" shakes its very binary...");
 		}
