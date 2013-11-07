@@ -7,7 +7,7 @@ namespace TheDeltaProject.Brain.NeuralNetwork
     class Neuron
     {
         private NeuralSynapse[] m_input;//used for the connections between each neuron
-        double m_output, m_error, m_lastError;
+        double m_output, m_delta, m_lastdelta;
         int m_ID;//the neurons Identification number, this makes it easier to save each neurons state to a database
         NeuralFactor m_bias;//the neurons bias
 
@@ -16,7 +16,7 @@ namespace TheDeltaProject.Brain.NeuralNetwork
         {
             m_ID = ID;//set the id
             m_bias = new NeuralFactor(bias);//set the bias
-            m_error = 0;//initialize the error variable
+            m_delta = 0;//initialize the error variable
         }
 
 		//provides access to the neurons output
@@ -47,21 +47,21 @@ namespace TheDeltaProject.Brain.NeuralNetwork
         }
 
 		//provides access to the neurons current error on the expected output 
-        public double Error
+        public double Delta
         {
-            get { return m_error; }
+            get { return m_delta; }
             set
             {
-                m_lastError = m_error;//update error history
-                m_error = value;
+                m_lastdelta = m_delta;//update error history
+                m_delta = value;
             }
         }
 
 		//provides access to the last error on the output that the neuron had(i.e how wrong it was on its last calculation)
-        public double LastError
+        public double LastDelta
         {
-            get { return m_lastError; }
-            set { m_lastError = value; }
+            get { return m_lastdelta; }
+            set { m_lastdelta = value; }
         }
 
 		//sets all unapplied weight changes of the neuron to zero

@@ -234,7 +234,7 @@ namespace TheDeltaProject.Brain.NeuralNetwork
 
 		//Calculates how much the error of the calculated output differs from the desired output(used for back prop)
 		//desiredResults array must have the same length as the number of ouptut layer neurons
-        private static void CalculateErrors(NeuralNet net, double[] desiredResults)
+        private static void CalculateNeuronDeltas(NeuralNet net, double[] desiredResults)
         {
             #region Declarations
 
@@ -250,7 +250,7 @@ namespace TheDeltaProject.Brain.NeuralNetwork
             {
                 actualResult = net.m_outputLayer[i].Output;//the neurons actual output
 
-                net.m_outputLayer[i].Error = (desiredResults[i] - actualResult) * SigmoidDerivative(actualResult); //sigmoidDerivative = actualResult * (1 - actualResult)
+                net.m_outputLayer[i].Delta = (desiredResults[i] - actualResult) * SigmoidDerivative(actualResult); //sigmoidDerivative = actualResult * (1 - actualResult)
             }
 
             // calculate last hidden layer error values
@@ -261,11 +261,11 @@ namespace TheDeltaProject.Brain.NeuralNetwork
                 error = 0;//reset the error value
                 for (j = 0; j < net.m_outputLayer.Count; j++)//loop for each neuron in the output layer
                 {
-                    error += (net.m_outputLayer[j].Error * net.m_outputLayer[j].Input[net.m_hiddenLayers[net.m_hiddenLayers.Length - 1][i].ID].synapseWeight.Weight); //calculate the error of hidden layer neuron according to the output layer neurons synapse weight, ouptut-layer neurons error and simgmoid derivative of the neurons output
+                    error += (net.m_outputLayer[j].Delta * net.m_outputLayer[j].Input[net.m_hiddenLayers[net.m_hiddenLayers.Length - 1][i].ID].synapseWeight.Weight); //calculate the error of hidden layer neuron according to the output layer neurons synapse weight, ouptut-layer neurons error and simgmoid derivative of the neurons output
                 }
                 error = error * SigmoidDerivative(actualResult);//sigmoidDerivative = actualResult * (1 - actualResult)
 
-                net.m_hiddenLayers[net.m_hiddenLayers.Length - 1][i].Error = error;//update the last hidden layer neurons error
+                net.m_hiddenLayers[net.m_hiddenLayers.Length - 1][i].Delta = error;//update the last hidden layer neurons error
 
             }
 
@@ -281,11 +281,11 @@ namespace TheDeltaProject.Brain.NeuralNetwork
                         error = 0;//clear the error value
                         for (j = 0; j < net.m_hiddenLayers[k].Count; j++)//loop for each neuron
                         {
-                            error += (net.m_hiddenLayers[k][j].Error * net.m_hiddenLayers[k][j].Input[net.m_hiddenLayers[k - 1][i].ID].synapseWeight.Weight); // calculate the error
+                            error += (net.m_hiddenLayers[k][j].Delta * net.m_hiddenLayers[k][j].Input[net.m_hiddenLayers[k - 1][i].ID].synapseWeight.Weight); // calculate the error
                         }
                         error = error * SigmoidDerivative(actualResult);//sigmoidDerivative = actualResult * (1 - actualResult)
 
-                        net.m_hiddenLayers[k - 1][i].Error = error;//update the neurons error
+                        net.m_hiddenLayers[k - 1][i].Delta = error;//update the neurons error
 
                     }
                 }
@@ -294,7 +294,53 @@ namespace TheDeltaProject.Brain.NeuralNetwork
             #endregion
         }
 
-		//correct the neuron bias' and synapse weightings of each progressive neural layer so as to minimize the output error.
+		//calculates the weight changes(Deltas) that need to be made(for the synapses and biases) according to the precalculated[precalculated with CalculateErrors()] errors
+        public static void CalculateBiasSynapseDeltas(NeuralNet net)
+        {
+            int i, j, k;
+            
+            // adjust output layer weight change
+            for (j = 0; j < net.m_outputLayer.Count; j++)//loop for each neuron in the output neural layer
+            {
+
+                for (i = 0; i < net.m_hiddenLayers[net.m_hiddenLayers.Length - 1].Count; i++)//loop for each neuron in the last hidden neural layer
+                {
+                    net.m_outputLayer[j].Input[net.m_hiddenLayers[net.m_hiddenLayers.Length - 1][i].ID].synapseWeight.Delta += net.m_outputLayer[j].Delta * net.m_hiddenLayers[net.m_hiddenLayers.Length - 1][i].Output;//calculate synapse weight adjustment to be made
+                }
+
+                net.m_outputLayer[j].Bias.Delta += net.m_outputLayer[j].Delta * net.m_outputLayer[j].Bias.Weight;//calculate bias weight adjustment to be made
+            }
+
+            //if more than 1 hidden layer, adjust all hidden layers weight changes. works from the last hidden neural layer to the first
+            if (net.m_hiddenLayers.Length > 1)
+            {
+                for (k = net.m_hiddenLayers.Length - 1; k > 0; k--)//loop for each hidden layer
+                {
+                    for (j = 0; j < net.m_hiddenLayers[k].Count; j++)//loop for each neuron
+                    {
+                        for (i = 0; i < net.m_hiddenLayers[k - 1].Count; i++)//loop for each neuron
+                        {
+                            net.m_hiddenLayers[k][j].Input[net.m_hiddenLayers[k - 1][i].ID].synapseWeight.Delta += net.m_hiddenLayers[k][j].Delta * net.m_hiddenLayers[k - 1][i].Output;//calculate synapse weight adjustment to be made
+                        }
+
+                        net.m_hiddenLayers[k][j].Bias.Delta += net.m_hiddenLayers[k][j].Delta * net.m_hiddenLayers[k][j].Bias.Weight;//calculate bias weight adjustment to be made
+                    }
+                }
+            }
+
+            // adjust first hidden layer weight change
+            for (j = 0; j < net.m_hiddenLayers[0].Count; j++)//loop for each neuron in the first neural layer
+            {
+                for (i = 0; i < net.m_inputLayer.Count; i++)//loop for each neuron
+                {
+                    net.m_hiddenLayers[0][j].Input[net.m_inputLayer[i].ID].synapseWeight.Delta += net.m_hiddenLayers[0][j].Delta * net.m_inputLayer[i].Output;//calculate synapse weight adjustment to be made
+                }
+
+                net.m_hiddenLayers[0][j].Bias.Delta += net.m_hiddenLayers[0][j].Delta * net.m_hiddenLayers[0][j].Bias.Weight;//calculate bias weight adjustment to be made
+            }
+        }
+
+        //correct the neuron bias' and synapse weightings of each progressive neural layer so as to minimize the output error.
         public void ApplyLearning()
         {
             lock (this)
@@ -314,60 +360,14 @@ namespace TheDeltaProject.Brain.NeuralNetwork
             }
         }
 
-		//calculates the weight changes(Deltas) that need to be made(for the synapses and biases) according to the precalculated[precalculated with CalculateErrors()] errors
-        public static void CalculateAndAppendTransformation(NeuralNet net)
-        {
-            int i, j, k;
-            
-            // adjust output layer weight change
-            for (j = 0; j < net.m_outputLayer.Count; j++)//loop for each neuron in the output neural layer
-            {
-
-                for (i = 0; i < net.m_hiddenLayers[net.m_hiddenLayers.Length - 1].Count; i++)//loop for each neuron in the last hidden neural layer
-                {
-					net.m_outputLayer[j].Input[net.m_hiddenLayers[net.m_hiddenLayers.Length - 1][i].ID].synapseWeight.Delta += net.m_outputLayer[j].Error * net.m_hiddenLayers[net.m_hiddenLayers.Length - 1][i].Output;//calculate synapse weight adjustment to be made
-                }
-
-                net.m_outputLayer[j].Bias.Delta += net.m_outputLayer[j].Error * net.m_outputLayer[j].Bias.Weight;//calculate bias weight adjustment to be made
-            }
-
-            //if more than 1 hidden layer, adjust all hidden layers weight changes. works from the last hidden neural layer to the first
-            if (net.m_hiddenLayers.Length > 1)
-            {
-                for (k = net.m_hiddenLayers.Length - 1; k > 0; k--)//loop for each hidden layer
-                {
-                    for (j = 0; j < net.m_hiddenLayers[k].Count; j++)//loop for each neuron
-                    {
-                        for (i = 0; i < net.m_hiddenLayers[k - 1].Count; i++)//loop for each neuron
-                        {
-                            net.m_hiddenLayers[k][j].Input[net.m_hiddenLayers[k - 1][i].ID].synapseWeight.Delta += net.m_hiddenLayers[k][j].Error * net.m_hiddenLayers[k - 1][i].Output;//calculate synapse weight adjustment to be made
-                        }
-
-                        net.m_hiddenLayers[k][j].Bias.Delta += net.m_hiddenLayers[k][j].Error * net.m_hiddenLayers[k][j].Bias.Weight;//calculate bias weight adjustment to be made
-                    }
-                }
-            }
-
-            // adjust first hidden layer weight change
-            for (j = 0; j < net.m_hiddenLayers[0].Count; j++)//loop for each neuron in the first neural layer
-            {
-                for (i = 0; i < net.m_inputLayer.Count; i++)//loop for each neuron
-                {
-                    net.m_hiddenLayers[0][j].Input[net.m_inputLayer[i].ID].synapseWeight.Delta += net.m_hiddenLayers[0][j].Error * net.m_inputLayer[i].Output;//calculate synapse weight adjustment to be made
-                }
-
-                net.m_hiddenLayers[0][j].Bias.Delta += net.m_hiddenLayers[0][j].Error * net.m_hiddenLayers[0][j].Bias.Weight;//calculate bias weight adjustment to be made
-            }
-        }
-
 
 		//used to train the network on one itteration of a single io dataset. does not apply actual weight changes
-        public static void BackPropogation_TrainingSession(NeuralNet net, double[] input, double[] desiredResult)
+        public void BackPropogation_TrainingSession(NeuralNet net, double[] input, double[] desiredResult)
         {
             PreparePerceptionLayerForPulse(net, input);//set the networks input
             net.Pulse();//calculate the networks output
-            CalculateErrors(net, desiredResult);//determine how wrong the outputs are
-            CalculateAndAppendTransformation(net);//determine how much the weightings need to be adjusted
+            CalculateNeuronDeltas(net, desiredResult);//determine how wrong the outputs are
+            CalculateBiasSynapseDeltas(net);//determine how much the weightings need to be adjusted
         }
 
 
