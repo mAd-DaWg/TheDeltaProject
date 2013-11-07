@@ -148,9 +148,12 @@ namespace TheDeltaProject
 			Console.WriteLine("NeuralNetTest                   Enters a testing ground to test the Neural ");
 			Console.WriteLine("                                Networks. To be issued while running the ");
 			Console.WriteLine("                                program terminal.");
+            Console.WriteLine();
+            Console.WriteLine("quit                            exits The Delta Project");
+
         }
 
-		private static void printIntro ()
+		public static void printIntro ()
 		{
 			//basic intro
 			Console.WriteLine ("Welcome to the Delta Project!");

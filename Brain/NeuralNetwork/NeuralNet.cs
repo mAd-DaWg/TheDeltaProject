@@ -28,7 +28,7 @@ namespace TheDeltaProject.Brain.NeuralNetwork
 		//squashes values between 0 and 1
         private static double SigmoidDerivative(double value)
         {
-            return value * (1.0F - value);
+            return value * (1 - value);
         }
 		
 		//return method for input/'perception' layer(generally used to obtain individual neuron/synapse data)
@@ -185,12 +185,12 @@ namespace TheDeltaProject.Brain.NeuralNetwork
         {
             int i;
 
-            if (input.Length != net.m_inputLayer.Count)//check that the input array length matches the number if input neurons in the input/perception layer 
+            if (input.Length != net.m_inputLayer.Count)//check that the input array length matches the number of input neurons in the input/perception layer 
             {
                 throw new ArgumentException(string.Format("Expecting {0} inputs for this net", net.m_inputLayer.Count));//throw an error saying what length the input array should be
             }
 
-            // initialize data
+            // set input data
             for (i = 0; i < net.m_inputLayer.Count; i++)//loop for each neuron in the layer
             {
                 net.m_inputLayer[i].Output = input[i];//set the output of the neuron to the matching index of the input array. the output of the neuron is set so as to prevent the input layer from interacting with the input data
@@ -226,57 +226,53 @@ namespace TheDeltaProject.Brain.NeuralNetwork
             #region Declarations
 
             int i, j, k;
-            double temp, error;
-            Neuron outputNode, hiddenNode;
+            double actualResult, error;
 
             #endregion
 
             #region Execution
 
             // Calcualte output error values 
-            for (i = 0; i < net.m_outputLayer.Count; i++)//loop for each neuron
+            for (i = 0; i < net.m_outputLayer.Count; i++)//loop for each neuron in the output layer
             {
-                outputNode = net.m_outputLayer[i];//place holder neuron
-                temp = outputNode.Output;//temporary value holder for the neurons output
+                actualResult = net.m_outputLayer[i].Output;//the neurons actual output
 
-                outputNode.Error = (desiredResults[i] - temp) * SigmoidDerivative(temp); //* temp * (1.0F - temp);
+                net.m_outputLayer[i].Error = (desiredResults[i] - actualResult) * SigmoidDerivative(actualResult); //sigmoidDerivative = actualResult * (1 - actualResult)
             }
 
             // calculate last hidden layer error values
             for (i = 0; i < net.m_hiddenLayers[net.m_hiddenLayers.Length-1].Count; i++)//loop for each neuron
             {
-                hiddenNode = net.m_hiddenLayers[net.m_hiddenLayers.Length-1][i];//place holder neuron
-                temp = hiddenNode.Output;//temporary value holder for the neurons output
+                actualResult = net.m_hiddenLayers[net.m_hiddenLayers.Length - 1][i].Output;//the neurons actual output
 
-                error = 0;//reset the errors value
+                error = 0;//reset the error value
                 for (j = 0; j < net.m_outputLayer.Count; j++)//loop for each neuron in the output layer
                 {
-                    outputNode = net.m_outputLayer[j];//temporary place holder for the output neuron
-                    error += (outputNode.Error * outputNode.Input[hiddenNode.ID].synapseWeight.Weight) * SigmoidDerivative(temp);// *(1.0F - temp);calculate the error of hidden layer neuron according to its output, the output layer neurons synapse weight and ouptut-layer neurons error
+                    error += (net.m_outputLayer[j].Error * net.m_outputLayer[j].Input[net.m_hiddenLayers[net.m_hiddenLayers.Length - 1][i].ID].synapseWeight.Weight); //calculate the error of hidden layer neuron according to the output layer neurons synapse weight, ouptut-layer neurons error and simgmoid derivative of the neurons output
                 }
+                error = error * SigmoidDerivative(actualResult);//sigmoidDerivative = actualResult * (1 - actualResult)
 
-                hiddenNode.Error = error;//update the hidden layer neurons error
+                net.m_hiddenLayers[net.m_hiddenLayers.Length - 1][i].Error = error;//update the last hidden layer neurons error
 
             }
 
 			// if more than 1 hidden layer, calculate all hidden layer error values.
-            if (net.m_hiddenLayers.Length > 1)//Synapses hookups are coded in a way that will complete all network hookups if only 1 hidden layer is used, as well as if more hidden layers are used, making this code dispensible if only 1 hidden layer is used.
+            if (net.m_hiddenLayers.Length > 1)//Synapses hookups are coded in a way that will complete all network hookups for any amount hidden layers used, making this code dispensible if only 1 hidden layer is used.
             {
                 for (k = net.m_hiddenLayers.Length-1; k > 0; k--)//loop from the last hidden layer to the first hidden layer
                 {
                     for (i = 0; i < net.m_hiddenLayers[k-1].Count; i++)//loop for each neuron
                     {
-                        hiddenNode = net.m_hiddenLayers[k-1][i];//place holder neuron
-                        temp = hiddenNode.Output;//temporary value holder for the neurons output
+                        actualResult = net.m_hiddenLayers[k - 1][i].Output;//the neurons actual output
 
-                        error = 0;//temporary value holder for the neurons output
+                        error = 0;//clear the error value
                         for (j = 0; j < net.m_hiddenLayers[k].Count; j++)//loop for each neuron
                         {
-                            outputNode = net.m_hiddenLayers[k][j];//place holder neuron
-                            error += (outputNode.Error * outputNode.Input[hiddenNode.ID].synapseWeight.Weight) * SigmoidDerivative(temp);// *(1.0F - temp); calculate the error
+                            error += (net.m_hiddenLayers[k][j].Error * net.m_hiddenLayers[k][j].Input[net.m_hiddenLayers[k - 1][i].ID].synapseWeight.Weight); // calculate the error
                         }
+                        error = error * SigmoidDerivative(actualResult);//sigmoidDerivative = actualResult * (1 - actualResult)
 
-                        hiddenNode.Error = error;//update the neurons error
+                        net.m_hiddenLayers[k - 1][i].Error = error;//update the neurons error
 
                     }
                 }
@@ -305,24 +301,21 @@ namespace TheDeltaProject.Brain.NeuralNetwork
             }
         }
 
-		//calculates the weight changes that need to be made(for the synapses and biases) according to the precalculated[precalculated with CalculateErrors()] errors
+		//calculates the weight changes(Deltas) that need to be made(for the synapses and biases) according to the precalculated[precalculated with CalculateErrors()] errors
         public static void CalculateAndAppendTransformation(NeuralNet net)
         {
             int i, j, k;
-            Neuron outputNode, inputNode, hiddenNode;
             
             // adjust output layer weight change
             for (j = 0; j < net.m_outputLayer.Count; j++)//loop for each neuron in the output neural layer
             {
-                outputNode = net.m_outputLayer[j];//place holder neuron
 
                 for (i = 0; i < net.m_hiddenLayers[net.m_hiddenLayers.Length - 1].Count; i++)//loop for each neuron in the last hidden neural layer
                 {
-                    hiddenNode = net.m_hiddenLayers[net.m_hiddenLayers.Length - 1][i];//place holder neuron
-					outputNode.Input[hiddenNode.ID].synapseWeight.H_Vector += outputNode.Error * hiddenNode.Output;//calculate synapse weight adjustment to be made
+					net.m_outputLayer[j].Input[net.m_hiddenLayers[net.m_hiddenLayers.Length - 1][i].ID].synapseWeight.Delta += net.m_outputLayer[j].Error * net.m_hiddenLayers[net.m_hiddenLayers.Length - 1][i].Output;//calculate synapse weight adjustment to be made
                 }
 
-                outputNode.Bias.H_Vector += outputNode.Error * outputNode.Bias.Weight;//calculate bias weight adjustment to be made
+                net.m_outputLayer[j].Bias.Delta += net.m_outputLayer[j].Error * net.m_outputLayer[j].Bias.Weight;//calculate bias weight adjustment to be made
             }
 
             //if more than 1 hidden layer, adjust all hidden layers weight changes. works from the last hidden neural layer to the first
@@ -332,15 +325,12 @@ namespace TheDeltaProject.Brain.NeuralNetwork
                 {
                     for (j = 0; j < net.m_hiddenLayers[k].Count; j++)//loop for each neuron
                     {
-                        outputNode = net.m_hiddenLayers[k][j];//place holder neuron
-
                         for (i = 0; i < net.m_hiddenLayers[k - 1].Count; i++)//loop for each neuron
                         {
-                            hiddenNode = net.m_hiddenLayers[k - 1][i];//place holder neuron
-                            outputNode.Input[hiddenNode.ID].synapseWeight.H_Vector += outputNode.Error * hiddenNode.Output;//calculate synapse weight adjustment to be made
+                            net.m_hiddenLayers[k][j].Input[net.m_hiddenLayers[k - 1][i].ID].synapseWeight.Delta += net.m_hiddenLayers[k][j].Error * net.m_hiddenLayers[k - 1][i].Output;//calculate synapse weight adjustment to be made
                         }
 
-                        outputNode.Bias.H_Vector += outputNode.Error * outputNode.Bias.Weight;//calculate bias weight adjustment to be made
+                        net.m_hiddenLayers[k][j].Bias.Delta += net.m_hiddenLayers[k][j].Error * net.m_hiddenLayers[k][j].Bias.Weight;//calculate bias weight adjustment to be made
                     }
                 }
             }
@@ -348,15 +338,12 @@ namespace TheDeltaProject.Brain.NeuralNetwork
             // adjust first hidden layer weight change
             for (j = 0; j < net.m_hiddenLayers[0].Count; j++)//loop for each neuron in the first neural layer
             {
-                hiddenNode = net.m_hiddenLayers[0][j];//place holder neuron
-
                 for (i = 0; i < net.m_inputLayer.Count; i++)//loop for each neuron
                 {
-                    inputNode = net.m_inputLayer[i];//place holder neuron
-                    hiddenNode.Input[inputNode.ID].synapseWeight.H_Vector += hiddenNode.Error * inputNode.Output;//calculate synapse weight adjustment to be made
+                    net.m_hiddenLayers[0][j].Input[net.m_inputLayer[i].ID].synapseWeight.Delta += net.m_hiddenLayers[0][j].Error * net.m_inputLayer[i].Output;//calculate synapse weight adjustment to be made
                 }
 
-                hiddenNode.Bias.H_Vector += hiddenNode.Error * hiddenNode.Bias.Weight;//calculate bias weight adjustment to be made
+                net.m_hiddenLayers[0][j].Bias.Delta += net.m_hiddenLayers[0][j].Error * net.m_hiddenLayers[0][j].Bias.Weight;//calculate bias weight adjustment to be made
             }
         }
 

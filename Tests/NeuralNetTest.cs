@@ -28,7 +28,14 @@ namespace TheDeltaProject.Tests
 			Console.WriteLine ("--------------------------------------------------------");
 			Console.WriteLine ("1  XOR - Trains the network to a basic logic function");
 			Console.WriteLine ("         Used to test network convergance and accuracy.");
-			Console.WriteLine ();
+            //Console.WriteLine ();
+            //Console.WriteLine ("2  NOR - Trains the network to a basic logic function");
+            //Console.WriteLine ("         Used to test network convergance and accuracy.");
+            //Console.WriteLine("         Currently broken, use ctrl+c to quit");
+            //Console.WriteLine ();
+            //Console.WriteLine ("3  XNOR - Trains the network to a basic logic function");
+            //Console.WriteLine ("         Used to test network convergance and accuracy.");
+            //Console.WriteLine("         Currently broken, use ctrl+c to quit");
 			Console.WriteLine ("--------------------------------------------------------");
 
 			while(true)
@@ -39,7 +46,17 @@ namespace TheDeltaProject.Tests
 				{
 					runXORtest ();
 					break;
-				} 
+				}
+                else if (testChoice == 2)
+                {
+                    runNORtest();
+                    break;
+                } 
+                else if (testChoice == 3)
+                {
+                    runXNORtest();
+                    break;
+                } 
 				else 
 				{
 					Console.WriteLine("unknown option");
@@ -286,16 +303,499 @@ namespace TheDeltaProject.Tests
 					quit = true;
 					Console.Clear();
 					//for asthetic sakes
-					//basic intro**************************************
-					Console.WriteLine ("Welcome to the Delta Project!");
-					Console.WriteLine ("+++++++++++++++++++++++++++++++++++++++++++++++");
-					Console.WriteLine ("We are still in the early phases of development");
-					Console.WriteLine ("Type help for a list of commands");
-					Console.WriteLine ("+++++++++++++++++++++++++++++++++++++++++++++++");
-					//*************************************************
+                    MainClass.printIntro();
 				}
 			}
 		}
+
+        //this function runs the NOR test on the Neural Network - not working
+        private void runNORtest()
+        {
+            Console.Clear();
+            Console.WriteLine("This is the NOR test");
+            Console.WriteLine("------------------------------------------");
+            Console.WriteLine("First we need to train the network.");
+
+            //instantiate variables needed for the test
+            //define the difference between high and low in binary
+            //this is done as the networks output is squashed between 0 and 1
+            double high = .99;
+            double low = .01;
+            double mid = .5;
+
+            double ll, lh, hl, hh;//binary input combinations
+            int count = 0; //keeps track of how many training sessions where needed to train the network to get an accurate result
+            int iterations = 5;//how many time to iterate through the data for each training session. More iterations give more acurate outputs from the Neural network;
+            double[][] input, output;
+            StringBuilder bld = new StringBuilder();
+
+            //array of inputs for training.
+            input = new double[4][];
+            input[0] = new double[] { high, high };
+            input[1] = new double[] { low, high };
+            input[2] = new double[] { high, low };
+            input[3] = new double[] { low, low };
+
+            //array of expected outputs. These outputs match the array of inputs.
+            output = new double[4][];
+            output[0] = new double[] { low };
+            output[1] = new double[] { low };
+            output[2] = new double[] { low };
+            output[3] = new double[] { high };
+
+            NeuralNet net = new NeuralNet();//create the NeuralNet object, The Neural Network still needs to be initialised.
+            // initialize the Neural Network with 
+            //   2 perception neurons(number of inputs to the network)
+            //   1 hidden layer (the number hidden layers to use[minimum of 1 is needed],
+            //                   Currently using more than one layer will cause a convergance error
+            //                   and training will loop infinitly in this example. This is a fault 
+            //                   in the Neural Network itself.)
+            //   2 hidden layer neurons (the number of neurons in the hidden layer/each hidden layer
+            //   1 output neuron (the number of outputs from the network)
+            net.Initialize(1, 2, 1, 2, 1);
+
+            Console.WriteLine();
+            Console.WriteLine("Okay, all variables needed for the test have been accounted for!");
+            Console.WriteLine("Now we will train the network to act like an NOR logic function...");
+
+            double[] inputData = { 0, 0 };
+
+            do
+            {
+                count++;//increas the count of training sessions done by 1
+
+                net.LearningRate = 3;//set the rate that the neural network learns. By default the network has a learning rate of 0.5
+                net.Train(input, output, iterations);//do a training session!
+
+                //get the results of training to see if more training is needed! Used by the while statement.
+                //show the actual value for the output for a binary input of 0 0
+                inputData[0] = low;
+                inputData[1] = low;
+                net.PreparePerceptionLayerForPulse(inputData);
+
+                net.Pulse();
+
+                ll = net.OutputLayer[0].Output;
+
+                //show the actual value for the output for a binary input of 1 0
+                inputData[0] = high;
+                inputData[1] = low;
+                net.PreparePerceptionLayerForPulse(inputData);
+
+                net.Pulse();
+
+                hl = net.OutputLayer[0].Output;
+
+                //show the actual value for the output for a binary input of 0 1
+                inputData[0] = low;
+                inputData[1] = high;
+                net.PreparePerceptionLayerForPulse(inputData);
+
+                net.Pulse();
+
+                lh = net.OutputLayer[0].Output;
+
+                //show the actual value for the output for a binary input of 1 1
+                inputData[0] = high;
+                inputData[1] = high;
+                net.PreparePerceptionLayerForPulse(inputData);
+
+                net.Pulse();
+
+                hh = net.OutputLayer[0].Output;
+            }
+            // really train this thing well...
+            while (hh > mid || lh > mid || hl > mid || ll < mid);
+
+            //show the actual value for the output for a binary input of 0 0
+            inputData[0] = low;
+            inputData[1] = low;
+            net.PreparePerceptionLayerForPulse(inputData);
+
+            net.Pulse();
+
+            ll = net.OutputLayer[0].Output;
+
+            //show the actual value for the output for a binary input of 1 0
+            inputData[0] = high;
+            inputData[1] = low;
+            net.PreparePerceptionLayerForPulse(inputData);
+
+            net.Pulse();
+
+            hl = net.OutputLayer[0].Output;
+
+            //show the actual value for the output for a binary input of 0 1
+            inputData[0] = low;
+            inputData[1] = high;
+            net.PreparePerceptionLayerForPulse(inputData);
+
+            net.Pulse();
+
+            lh = net.OutputLayer[0].Output;
+
+            //show the actual value for the output for a binary input of 1 1
+            inputData[0] = high;
+            inputData[1] = high;
+            net.PreparePerceptionLayerForPulse(inputData);
+
+            net.Pulse();
+
+            hh = net.OutputLayer[0].Output;
+
+            Console.WriteLine();
+            Console.WriteLine("Training is Complete!");
+            Console.WriteLine("Here are the results of the networks learning");
+            Console.WriteLine("==================================");
+
+            //print out training results
+            bld.Remove(0, bld.Length);
+            bld.Append((count * iterations).ToString()).Append(" iterations required for training\n");
+
+            bld.Append("hh: ").Append(hh.ToString()).Append(" < .5\n");
+            bld.Append("ll: ").Append(ll.ToString()).Append(" > .5\n");
+
+            bld.Append("hl: ").Append(hl.ToString()).Append(" < .5\n");
+            bld.Append("lh: ").Append(lh.ToString()).Append(" < .5\n");
+
+            Console.WriteLine(bld.ToString());
+            Console.WriteLine("==================================");
+
+            Console.WriteLine("Press any key to continue...");
+            Console.ReadKey();
+
+            Console.Clear();
+
+            Console.WriteLine("Now for the fun part!");
+            Console.WriteLine("-----------------------------------------------");
+            Console.WriteLine("To really get a feel for what the neural net");
+            Console.WriteLine("does, put in the binary for yourself(either ");
+            Console.WriteLine("a 1 or a 0 only.) You will be asked for two ");
+            Console.WriteLine("values, one at a time. The Neural Network will");
+            Console.WriteLine("then calculate the answer. I suggest you lookup");
+            Console.WriteLine("an \"NOR Truth Table\" to compare the answers");
+            Console.WriteLine("-----------------------------------------------");
+
+            bool quit = false;
+            double[] inputDat = { 0, 0 };
+            double outputDat = 0;//used for values pertaining to network io
+            string ans = "";
+
+            while (quit == false)
+            {
+                Console.WriteLine();
+                //get input for first input neuron aka input A
+                while (true)//loop untill they give a valid input
+                {
+                    Console.WriteLine();
+                    Console.Write("Please enter a value for input A: ");
+                    ans = Console.ReadLine();//get value from console
+                    if (ans.Equals("0") || ans.ToLower().Equals("false") || ans.ToLower().Equals("f"))
+                    {
+                        inputDat[0] = low;
+                        break;//end the loop
+                    }
+                    else if (ans.Equals("1") || ans.ToLower().Equals("true") || ans.ToLower().Equals("t"))
+                    {
+                        inputDat[0] = high;
+                        break;//end the loop
+                    }
+                    else
+                    {
+                        Console.WriteLine(ans + " is not a valid input! Type in only a 0 or 1");
+                    }
+                }
+
+                //get input for second input neuron aka input B
+                while (true)//loop untill they give a valid input
+                {
+                    Console.WriteLine();
+                    Console.Write("Please enter a value for input B: ");
+                    ans = Console.ReadLine();//get value from console
+                    if (ans.Equals("0") || ans.ToLower().Equals("false") || ans.ToLower().Equals("f"))
+                    {
+                        inputDat[1] = low;
+                        break;//end the loop
+                    }
+                    else if (ans.Equals("1") || ans.ToLower().Equals("true") || ans.ToLower().Equals("t"))
+                    {
+                        inputDat[1] = high;
+                        break;//end the loop
+                    }
+                    else
+                    {
+                        Console.WriteLine(ans + " is not a valid input! Type in only a 0 or 1");
+                    }
+                }
+                net.PreparePerceptionLayerForPulse(inputDat);//set the network inputs
+
+                net.Pulse();//"Pulsing" the network calculates the network output based on its input. 
+
+                outputDat = net.OutputLayer[0].Output;//the net.OutputLayer[] array gives direct acces to the neurons in the output layer numbered from left to right.
+
+                Console.WriteLine("Result:");
+                Console.WriteLine("A  B  |  Q");
+                Console.WriteLine("----------");
+                Console.WriteLine(ToBinaryString(inputDat[0]) + "  " + ToBinaryString(inputDat[1]) + "  |  " + ToBinaryString(outputDat));
+                Console.WriteLine("----------");
+
+                Console.WriteLine();
+                Console.Write("Do you want to try another input combination [Y or n]: ");
+                ans = Console.ReadLine().ToLower();//get value from console
+                if (ans.Equals("n") || ans.Equals("no"))
+                {
+                    quit = true;
+                    Console.Clear();
+                    //for asthetic sakes
+                    MainClass.printIntro();
+                }
+            }
+        }
+
+        //this function runs the XNOR test on the Neural Network - not working
+        //code is quite similar to XOR test, there is definatly repeated code. Todo: enforce OOP!
+        private void runXNORtest()
+        {
+            Console.Clear();
+            Console.WriteLine("This is the XNOR test");
+            Console.WriteLine("------------------------------------------");
+            Console.WriteLine("First we need to train the network.");
+
+            //instantiate variables needed for the test
+            //define the difference between high and low in binary
+            //this is done as the networks output is squashed between 0 and 1
+            double high = .99;
+            double low = .01;
+            double mid = .5;
+
+            double ll, lh, hl, hh;//binary input combinations
+            int count = 0; //keeps track of how many training sessions where needed to train the network to get an accurate result
+            int iterations = 5;//how many time to iterate through the data for each training session. More iterations give more acurate outputs from the Neural network;
+            double[][] input, output;
+            StringBuilder bld = new StringBuilder();
+
+            //array of inputs for training.
+            input = new double[4][];
+            input[0] = new double[] { high, high };
+            input[1] = new double[] { low, high };
+            input[2] = new double[] { high, low };
+            input[3] = new double[] { low, low };
+
+            //array of expected outputs. These outputs match the array of inputs.
+            output = new double[4][];
+            output[0] = new double[] { high };
+            output[1] = new double[] { low };
+            output[2] = new double[] { low };
+            output[3] = new double[] { high };
+
+            NeuralNet net = new NeuralNet();//create the NeuralNet object, The Neural Network still needs to be initialised.
+            // initialize the Neural Network with 
+            //   2 perception neurons(number of inputs to the network)
+            //   1 hidden layer (the number hidden layers to use[minimum of 1 is needed],
+            //                   Currently using more than one layer will cause a convergance error
+            //                   and training will loop infinitly in this example. This is a fault 
+            //                   in the Neural Network itself.)
+            //   2 hidden layer neurons (the number of neurons in the hidden layer/each hidden layer
+            //   1 output neuron (the number of outputs from the network)
+            net.Initialize(1, 2, 1, 2, 1);
+
+            Console.WriteLine();
+            Console.WriteLine("Okay, all variables needed for the test have been accounted for!");
+            Console.WriteLine("Now we will train the network to act like an XNOR logic function...");
+
+            double[] inputData = { 0, 0 };
+
+            do
+            {
+                count++;//increas the count of training sessions done by 1
+
+                net.LearningRate = 0.5;//set the rate that the neural network learns. By default the network has a learning rate of 0.5
+                net.Train(input, output, iterations);//do a training session!
+
+                //get the results of training to see if more training is needed! Used by the while statement.
+                //show the actual value for the output for a binary input of 0 0
+                inputData[0] = low;
+                inputData[1] = low;
+                net.PreparePerceptionLayerForPulse(inputData);
+
+                net.Pulse();
+
+                ll = net.OutputLayer[0].Output;
+
+                //show the actual value for the output for a binary input of 1 0
+                inputData[0] = high;
+                inputData[1] = low;
+                net.PreparePerceptionLayerForPulse(inputData);
+
+                net.Pulse();
+
+                hl = net.OutputLayer[0].Output;
+
+                //show the actual value for the output for a binary input of 0 1
+                inputData[0] = low;
+                inputData[1] = high;
+                net.PreparePerceptionLayerForPulse(inputData);
+
+                net.Pulse();
+
+                lh = net.OutputLayer[0].Output;
+
+                //show the actual value for the output for a binary input of 1 1
+                inputData[0] = high;
+                inputData[1] = high;
+                net.PreparePerceptionLayerForPulse(inputData);
+
+                net.Pulse();
+
+                hh = net.OutputLayer[0].Output;
+            }
+            // really train this thing well...
+            while (hh < (mid + high) / 2 || lh > (mid + low) / 2 || hl > (mid + low) / 2 || ll < (mid + high) / 2);
+
+            //show the actual value for the output for a binary input of 0 0
+            inputData[0] = low;
+            inputData[1] = low;
+            net.PreparePerceptionLayerForPulse(inputData);
+
+            net.Pulse();
+
+            ll = net.OutputLayer[0].Output;
+
+            //show the actual value for the output for a binary input of 1 0
+            inputData[0] = high;
+            inputData[1] = low;
+            net.PreparePerceptionLayerForPulse(inputData);
+
+            net.Pulse();
+
+            hl = net.OutputLayer[0].Output;
+
+            //show the actual value for the output for a binary input of 0 1
+            inputData[0] = low;
+            inputData[1] = high;
+            net.PreparePerceptionLayerForPulse(inputData);
+
+            net.Pulse();
+
+            lh = net.OutputLayer[0].Output;
+
+            //show the actual value for the output for a binary input of 1 1
+            inputData[0] = high;
+            inputData[1] = high;
+            net.PreparePerceptionLayerForPulse(inputData);
+
+            net.Pulse();
+
+            hh = net.OutputLayer[0].Output;
+
+            Console.WriteLine();
+            Console.WriteLine("Training is Complete!");
+            Console.WriteLine("Here are the results of the networks learning");
+            Console.WriteLine("==================================");
+
+            //print out training results
+            bld.Remove(0, bld.Length);
+            bld.Append((count * iterations).ToString()).Append(" iterations required for training\n");
+
+            bld.Append("hh: ").Append(hh.ToString()).Append(" > .5\n");
+            bld.Append("ll: ").Append(ll.ToString()).Append(" > .5\n");
+
+            bld.Append("hl: ").Append(hl.ToString()).Append(" < .5\n");
+            bld.Append("lh: ").Append(lh.ToString()).Append(" < .5\n");
+
+            Console.WriteLine(bld.ToString());
+            Console.WriteLine("==================================");
+
+            Console.WriteLine("Press any key to continue...");
+            Console.ReadKey();
+
+            Console.Clear();
+
+            Console.WriteLine("Now for the fun part!");
+            Console.WriteLine("-----------------------------------------------");
+            Console.WriteLine("To really get a feel for what the neural net");
+            Console.WriteLine("does, put in the binary for yourself(either ");
+            Console.WriteLine("a 1 or a 0 only.) You will be asked for two ");
+            Console.WriteLine("values, one at a time. The Neural Network will");
+            Console.WriteLine("then calculate the answer. I suggest you lookup");
+            Console.WriteLine("an \"XNOR Truth Table\" to compare the answers");
+            Console.WriteLine("-----------------------------------------------");
+
+            bool quit = false;
+            double[] inputDat = { 0, 0 };
+            double outputDat = 0;//used for values pertaining to network io
+            string ans = "";
+
+            while (quit == false)
+            {
+                Console.WriteLine();
+                //get input for first input neuron aka input A
+                while (true)//loop untill they give a valid input
+                {
+                    Console.WriteLine();
+                    Console.Write("Please enter a value for input A: ");
+                    ans = Console.ReadLine();//get value from console
+                    if (ans.Equals("0") || ans.ToLower().Equals("false") || ans.ToLower().Equals("f"))
+                    {
+                        inputDat[0] = low;
+                        break;//end the loop
+                    }
+                    else if (ans.Equals("1") || ans.ToLower().Equals("true") || ans.ToLower().Equals("t"))
+                    {
+                        inputDat[0] = high;
+                        break;//end the loop
+                    }
+                    else
+                    {
+                        Console.WriteLine(ans + " is not a valid input! Type in only a 0 or 1");
+                    }
+                }
+
+                //get input for second input neuron aka input B
+                while (true)//loop untill they give a valid input
+                {
+                    Console.WriteLine();
+                    Console.Write("Please enter a value for input B: ");
+                    ans = Console.ReadLine();//get value from console
+                    if (ans.Equals("0") || ans.ToLower().Equals("false") || ans.ToLower().Equals("f"))
+                    {
+                        inputDat[1] = low;
+                        break;//end the loop
+                    }
+                    else if (ans.Equals("1") || ans.ToLower().Equals("true") || ans.ToLower().Equals("t"))
+                    {
+                        inputDat[1] = high;
+                        break;//end the loop
+                    }
+                    else
+                    {
+                        Console.WriteLine(ans + " is not a valid input! Type in only a 0 or 1");
+                    }
+                }
+                net.PreparePerceptionLayerForPulse(inputDat);//set the network inputs
+
+                net.Pulse();//"Pulsing" the network calculates the network output based on its input. 
+
+                outputDat = net.OutputLayer[0].Output;//the net.OutputLayer[] array gives direct acces to the neurons in the output layer numbered from left to right.
+
+                Console.WriteLine("Result:");
+                Console.WriteLine("A  B  |  Q");
+                Console.WriteLine("----------");
+                Console.WriteLine(ToBinaryString(inputDat[0]) + "  " + ToBinaryString(inputDat[1]) + "  |  " + ToBinaryString(outputDat));
+                Console.WriteLine("----------");
+
+                Console.WriteLine();
+                Console.Write("Do you want to try another input combination [Y or n]: ");
+                ans = Console.ReadLine().ToLower();//get value from console
+                if (ans.Equals("n") || ans.Equals("no"))
+                {
+                    quit = true;
+                    Console.Clear();
+                    //for asthetic sakes
+                    MainClass.printIntro();
+                }
+            }
+        }
 
 		//converts a double into a binary value returned as a string
 		string ToBinaryString (double input)

@@ -23,14 +23,14 @@ namespace TheDeltaProject.Brain.NeuralNetwork
         }
 
 		//provides access to the cumulative weight change to be applied
-        public double H_Vector
+        public double Delta
         {
             get { return m_delta; }
             set { m_delta = value; }
         }
 
 		//returns the last cumulative weight change that was applied
-        public double Last_H_Vector
+        public double LastDelta
         {
             get { return m_lastDelta; }
             //set { m_lastDelta = value; }
