@@ -16,6 +16,7 @@ namespace TheDeltaProject
 {
 	class MainClass
 	{
+
 		public static void Main (string[] args)
 		{
 			printIntro ();
@@ -137,16 +138,10 @@ namespace TheDeltaProject
 		//prints out the avaliable commands and their usage
         private static void help()
         {
-            Console.WriteLine();
-			Console.WriteLine("thedeltaproject -e <string>     Echos the string. Note, strings must be enclosed");
-			Console.WriteLine("                                in \"'s");
-			Console.WriteLine("alternate use: echo <string>    To be issued while running the program terminal.");
-			Console.WriteLine();
-			Console.WriteLine("NeuralNetTest                   Enters a testing ground to test the Neural ");
-			Console.WriteLine("                                Networks. To be issued while running the ");
-			Console.WriteLine("                                program terminal.");
-            Console.WriteLine();
-            Console.WriteLine("quit                            exits The Delta Project");
+			Writer.writeTitle("thedeltaproject -e <string>","Echos the string. Note, strings must be enclosed in \"'s");
+			Writer.writeTitle("alternate use: echo <string>", "To be issued while running the program terminal.");
+			Writer.writeTitle("NeuralNetTest", "Enters a testing ground to test the Neural Networks. To be issued while running the program terminal.");
+            Writer.writeTitle("quit", "exits The Delta Project");
 
         }
 

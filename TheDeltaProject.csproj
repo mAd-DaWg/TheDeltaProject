@@ -47,6 +47,7 @@
     <Compile Include="Brain\NeuralNetwork\Neuron.cs" />
     <Compile Include="Tests\NeuralNetTest.cs" />
     <Compile Include="Brain\Cranium.cs" />
+    <Compile Include="Writer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
