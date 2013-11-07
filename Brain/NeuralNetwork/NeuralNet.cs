@@ -218,6 +218,19 @@ namespace TheDeltaProject.Brain.NeuralNetwork
             }
         }
 
+        //simple function to simplify using the network to calculate an output
+        public double[] CalculateOutput(double[] inputdat)
+        {
+            double[] outdat = new double[m_outputLayer.Count];//set the output array to the number of network outputs
+            PreparePerceptionLayerForPulse(inputdat);//set the network input data
+            Pulse();//calculate network output based on input
+            for (int i = 0; i < m_outputLayer.Count; i++)//assign network outputs to this functions output array
+            {
+                outdat[i] = m_outputLayer[i].Output;
+            }
+            return outdat;
+        }
+
 
 		//Calculates how much the error of the calculated output differs from the desired output(used for back prop)
 		//desiredResults array must have the same length as the number of ouptut layer neurons
