@@ -58,6 +58,7 @@ namespace TheDeltaProject
 
 			while (quit == false) //loop untill a quite command is issued
 			{
+				Console.Write("prompt> "); // Prompt the user
 				command = Console.ReadLine ();//read input from the terminal
 
 				if(command.Equals ("help"))
@@ -88,13 +89,13 @@ namespace TheDeltaProject
 					else
 					{
 						printCommandNotRecognised(command);
-						Console.WriteLine();
+						//Console.WriteLine();
 					}
 				}
 				else//if the command is not listed above
 				{
 					printCommandNotRecognised(command);
-					Console.WriteLine();
+					//Console.WriteLine();
 				}
 			}
 		}//end of commandLineMode()
