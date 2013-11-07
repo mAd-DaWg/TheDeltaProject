@@ -225,3 +225,6 @@ pip-log.txt
 *.pidb
 *.resources
 test-results/
+
+# .sln since a .csproj file exists
+*.sln
