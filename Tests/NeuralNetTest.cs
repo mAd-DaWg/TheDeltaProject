@@ -200,7 +200,7 @@ namespace TheDeltaProject.Tests
 
 			bool quit = false;
 			double[] inputDat = {0, 0};
-			double outputDat = 0;//used for values pertaining to network io
+			double[] outputDat = {0};//used for values pertaining to network io
 			string ans = "";
 
 			while (quit == false) 
@@ -249,19 +249,11 @@ namespace TheDeltaProject.Tests
 						Console.WriteLine(ans + " is not a valid input! Type in only a 0 or 1");
 					}
 				}
-				net.PreparePerceptionLayerForPulse (inputDat);//set the network inputs
 
-				net.Pulse ();//"Pulsing" the network calculates the network output based on its input. 
+                outputDat = net.CalculateOutput(inputDat);//calculate the output value for the users input
 
-				outputDat = net.OutputLayer[0].Output;//the net.OutputLayer[] array gives direct acces to the neurons in the output layer numbered from left to right.
+                printBinaryResult("XOR", inputDat, outputDat[0]);
 
-				Console.WriteLine ("Result:");
-				Console.WriteLine ("A  B  |  Q");
-				Console.WriteLine ("----------");
-				Console.WriteLine (ToBinaryString(inputDat[0]) + "  " + ToBinaryString(inputDat[1]) + "  |  " + ToBinaryString(outputDat));
-				Console.WriteLine ("----------");
-
-				Console.WriteLine ();
 				Console.Write ("Do you want to try another input combination [Y or n]: ");
 				ans = Console.ReadLine().ToLower();//get value from console
 				if(ans.Equals("n") || ans.Equals("no"))
@@ -273,6 +265,18 @@ namespace TheDeltaProject.Tests
 				}
 			}
 		}
+
+        //print the results of a binary calculation
+        private void printBinaryResult(string function, double[] input, double output)
+        {
+            Console.WriteLine();
+            Console.WriteLine(function + " result:");
+            Console.WriteLine("A  B  |  Q");
+            Console.WriteLine("----------");
+            Console.WriteLine(ToBinaryString(input[0]) + "  " + ToBinaryString(input[1]) + "  |  " + ToBinaryString(output));
+            Console.WriteLine("----------");
+            Console.WriteLine();
+        }
 
 		//converts a double into a binary value returned as a string
 		string ToBinaryString (double input)
