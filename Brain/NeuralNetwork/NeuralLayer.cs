@@ -7,10 +7,12 @@ namespace TheDeltaProject.Brain.NeuralNetwork
     class NeuralLayer
     {
         private Neuron[] m_neurons;//array of the neurons in the neural layer
+        public bool sigmoidActiv = false;
 
         //constructor. requires the amount of neurons to be had in the layer
-		public NeuralLayer(int neuronCount)
+		public NeuralLayer(int neuronCount, bool sigmoidActive)
         {
+            sigmoidActiv = sigmoidActive;
             m_neurons = new Neuron[neuronCount];
         }
 
@@ -41,7 +43,7 @@ namespace TheDeltaProject.Brain.NeuralNetwork
         {
             for (int i = 0; i < m_neurons.Length; i++)//loop for each neuron in the array
             {
-                m_neurons[i].Pulse();//send the pulse command
+                m_neurons[i].Pulse(sigmoidActiv);//send the pulse command
             }
         }
 

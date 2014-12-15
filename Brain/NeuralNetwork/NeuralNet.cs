@@ -25,12 +25,6 @@ namespace TheDeltaProject.Brain.NeuralNetwork
             m_learningRate = learningRate;
         }
 		
-		//squashes values between 0 and 1
-        private static double SigmoidDerivative(double value)
-        {
-            return value * (1 - value);
-        }
-		
 		//return method for input/'perception' layer(generally used to obtain individual neuron/synapse data)
         public NeuralLayer PerceptionLayer
         {
@@ -59,24 +53,24 @@ namespace TheDeltaProject.Brain.NeuralNetwork
 		
 		//prevents cross contamination. Specifically references This neuralnet and not any other that could be running.
 		//randomSeed refers to the number used by a Random object to generate 
-        public void Initialize(int randomSeed, int inputNeuronCount, int hiddenLayerCount, int hiddenNeuronCount, int outputNeuronCount)
+        public void Initialize(int randomSeed, int inputNeuronCount, int hiddenLayerCount, int hiddenNeuronCount, int outputNeuronCount, bool sigmoidActiv)
         {
-            Initialize(this, randomSeed, inputNeuronCount, hiddenLayerCount, hiddenNeuronCount, outputNeuronCount);
+            Initialize(this, randomSeed, inputNeuronCount, hiddenLayerCount, hiddenNeuronCount, outputNeuronCount, sigmoidActiv);
         }
 		
 		//instantiate the neural network as an object(also provides access to each neural layer, and in turn each neuron and synapse)
-        private static void Initialize (NeuralNet net, int randomSeed, int inputNeuronCount, int hiddenLayerCount, int hiddenNeuronCount, int outputNeuronCount)
+        private static void Initialize (NeuralNet net, int randomSeed, int inputNeuronCount, int hiddenLayerCount, int hiddenNeuronCount, int outputNeuronCount, bool sigmoidActiv)
 		{
 			if (hiddenLayerCount > 0) {//neural network will not function with no hidden neural layers.
 				int i, j, k;//a more efficient way of using counters.
 				Random rand = new Random (randomSeed);//obj rand is used to assign a random bias to each neuron(gets passed through the neurons respective neural layer).
 	
 				//initialize
-				net.m_inputLayer = new NeuralLayer (inputNeuronCount);//make an input neural layer object, load it with spaces for neurons
-				net.m_outputLayer = new NeuralLayer (outputNeuronCount);//make an output neural layer object, load it with spaces for neurons
+				net.m_inputLayer = new NeuralLayer (inputNeuronCount, sigmoidActiv);//make an input neural layer object, load it with spaces for neurons
+				net.m_outputLayer = new NeuralLayer (outputNeuronCount, sigmoidActiv);//make an output neural layer object, load it with spaces for neurons
 				net.m_hiddenLayers = new NeuralLayer[hiddenLayerCount];//instantiate the array of layers to be contained in the hidden layer region of the neural net
 				for (k = 0; k < hiddenLayerCount; k++) {
-					net.m_hiddenLayers [k] = new NeuralLayer (hiddenNeuronCount);//make a single neural layer object and load it with spaces for neurons. loops for the number of hidden layer required.
+					net.m_hiddenLayers [k] = new NeuralLayer (hiddenNeuronCount, sigmoidActiv);//make a single neural layer object and load it with spaces for neurons. loops for the number of hidden layer required.
 				}
 	
 				//populate
@@ -245,28 +239,58 @@ namespace TheDeltaProject.Brain.NeuralNetwork
 
             #region Execution
 
-            // Calcualte output error values 
-            for (i = 0; i < net.m_outputLayer.Count; i++)//loop for each neuron in the output layer
+            // Calcualte output error values
+            if (net.m_outputLayer.sigmoidActiv == true)//using sigmoid
             {
-                actualResult = net.m_outputLayer[i].Output;//the neurons actual output
+                for (i = 0; i < net.m_outputLayer.Count; i++)//loop for each neuron in the output layer
+                {
+                    actualResult = net.m_outputLayer[i].Output;//the neurons actual output
 
-                net.m_outputLayer[i].Delta = (desiredResults[i] - actualResult) * SigmoidDerivative(actualResult); //sigmoidDerivative = actualResult * (1 - actualResult)
+                    net.m_outputLayer[i].Delta = (desiredResults[i] - actualResult) * Mathematics.SigmoidDerivative(actualResult); //sigmoidDerivative = actualResult * (1 - actualResult)
+                }
+            }
+            else//using tanh
+            {
+                for (i = 0; i < net.m_outputLayer.Count; i++)//loop for each neuron in the output layer
+                {
+                    actualResult = net.m_outputLayer[i].Output;//the neurons actual output
+
+                    net.m_outputLayer[i].Delta = (desiredResults[i] - actualResult) * Mathematics.TanHDerivative(actualResult); //
+                }
             }
 
             // calculate last hidden layer error values
-            for (i = 0; i < net.m_hiddenLayers[net.m_hiddenLayers.Length-1].Count; i++)//loop for each neuron
+            if (net.m_hiddenLayers[net.m_hiddenLayers.Length - 1].sigmoidActiv == true)//using sigmoid
             {
-                actualResult = net.m_hiddenLayers[net.m_hiddenLayers.Length - 1][i].Output;//the neurons actual output
-
-                error = 0;//reset the error value
-                for (j = 0; j < net.m_outputLayer.Count; j++)//loop for each neuron in the output layer
+                for (i = 0; i < net.m_hiddenLayers[net.m_hiddenLayers.Length - 1].Count; i++)//loop for each neuron
                 {
-                    error += (net.m_outputLayer[j].Delta * net.m_outputLayer[j].Input[net.m_hiddenLayers[net.m_hiddenLayers.Length - 1][i].ID].synapseWeight.Weight); //calculate the error of hidden layer neuron according to the output layer neurons synapse weight, ouptut-layer neurons error and simgmoid derivative of the neurons output
+                    actualResult = net.m_hiddenLayers[net.m_hiddenLayers.Length - 1][i].Output;//the neurons actual output
+
+                    error = 0;//reset the error value
+                    for (j = 0; j < net.m_outputLayer.Count; j++)//loop for each neuron in the output layer
+                    {
+                        error += (net.m_outputLayer[j].Delta * net.m_outputLayer[j].Input[net.m_hiddenLayers[net.m_hiddenLayers.Length - 1][i].ID].synapseWeight.Weight); //calculate the error of hidden layer neuron according to the output layer neurons synapse weight, ouptut-layer neurons error and simgmoid derivative of the neurons output
+                    }
+                    error = error * Mathematics.SigmoidDerivative(actualResult);//sigmoidDerivative = actualResult * (1 - actualResult)
+
+                    net.m_hiddenLayers[net.m_hiddenLayers.Length - 1][i].Delta = error;//update the last hidden layer neurons error
                 }
-                error = error * SigmoidDerivative(actualResult);//sigmoidDerivative = actualResult * (1 - actualResult)
+            }
+            else//using tanh
+            {
+                for (i = 0; i < net.m_hiddenLayers[net.m_hiddenLayers.Length - 1].Count; i++)//loop for each neuron
+                {
+                    actualResult = net.m_hiddenLayers[net.m_hiddenLayers.Length - 1][i].Output;//the neurons actual output
 
-                net.m_hiddenLayers[net.m_hiddenLayers.Length - 1][i].Delta = error;//update the last hidden layer neurons error
+                    error = 0;//reset the error value
+                    for (j = 0; j < net.m_outputLayer.Count; j++)//loop for each neuron in the output layer
+                    {
+                        error += (net.m_outputLayer[j].Delta * net.m_outputLayer[j].Input[net.m_hiddenLayers[net.m_hiddenLayers.Length - 1][i].ID].synapseWeight.Weight); //calculate the error of hidden layer neuron according to the output layer neurons synapse weight, ouptut-layer neurons error and simgmoid derivative of the neurons output
+                    }
+                    error = error * Mathematics.TanHDerivative(actualResult);//
 
+                    net.m_hiddenLayers[net.m_hiddenLayers.Length - 1][i].Delta = error;//update the last hidden layer neurons error
+                }
             }
 
 			// if more than 1 hidden layer, calculate all hidden layer error values.
@@ -274,19 +298,37 @@ namespace TheDeltaProject.Brain.NeuralNetwork
             {
                 for (k = net.m_hiddenLayers.Length-1; k > 0; k--)//loop from the last hidden layer to the first hidden layer
                 {
-                    for (i = 0; i < net.m_hiddenLayers[k-1].Count; i++)//loop for each neuron
+                    if (net.m_hiddenLayers[k - 1].sigmoidActiv == true)//using sigmoid
                     {
-                        actualResult = net.m_hiddenLayers[k - 1][i].Output;//the neurons actual output
-
-                        error = 0;//clear the error value
-                        for (j = 0; j < net.m_hiddenLayers[k].Count; j++)//loop for each neuron
+                        for (i = 0; i < net.m_hiddenLayers[k - 1].Count; i++)//loop for each neuron
                         {
-                            error += (net.m_hiddenLayers[k][j].Delta * net.m_hiddenLayers[k][j].Input[net.m_hiddenLayers[k - 1][i].ID].synapseWeight.Weight); // calculate the error
+                            actualResult = net.m_hiddenLayers[k - 1][i].Output;//the neurons actual output
+
+                            error = 0;//clear the error value
+                            for (j = 0; j < net.m_hiddenLayers[k].Count; j++)//loop for each neuron
+                            {
+                                error += (net.m_hiddenLayers[k][j].Delta * net.m_hiddenLayers[k][j].Input[net.m_hiddenLayers[k - 1][i].ID].synapseWeight.Weight); // calculate the error
+                            }
+                            error = error * Mathematics.SigmoidDerivative(actualResult);//sigmoidDerivative = actualResult * (1 - actualResult)
+
+                            net.m_hiddenLayers[k - 1][i].Delta = error;//update the neurons error
                         }
-                        error = error * SigmoidDerivative(actualResult);//sigmoidDerivative = actualResult * (1 - actualResult)
+                    }
+                    else//using tanh
+                    {
+                        for (i = 0; i < net.m_hiddenLayers[k - 1].Count; i++)//loop for each neuron
+                        {
+                            actualResult = net.m_hiddenLayers[k - 1][i].Output;//the neurons actual output
 
-                        net.m_hiddenLayers[k - 1][i].Delta = error;//update the neurons error
+                            error = 0;//clear the error value
+                            for (j = 0; j < net.m_hiddenLayers[k].Count; j++)//loop for each neuron
+                            {
+                                error += (net.m_hiddenLayers[k][j].Delta * net.m_hiddenLayers[k][j].Input[net.m_hiddenLayers[k - 1][i].ID].synapseWeight.Weight); // calculate the error
+                            }
+                            error = error * Mathematics.TanHDerivative(actualResult);//
 
+                            net.m_hiddenLayers[k - 1][i].Delta = error;//update the neurons error
+                        }
                     }
                 }
             }

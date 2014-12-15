@@ -87,7 +87,7 @@ namespace TheDeltaProject.Brain.NeuralNetwork
         }
 
 		//calculates the neurons output based on the synapses weighting and the neurons biasing
-        public void Pulse()
+        public void Pulse(bool sigmoidActiv)
         {
             lock (this)
             {
@@ -100,16 +100,17 @@ namespace TheDeltaProject.Brain.NeuralNetwork
 
                 m_output += m_bias.Weight;//apply the neurons biasing to the output signal
 
-                m_output = Sigmoid(m_output);//squash the output signal between 0 and 1
+                //check the atvivation function to use
+                if (sigmoidActiv == true)
+                {
+                    m_output = Mathematics.Sigmoid(m_output);//squash the output signal between 0 and 1
+                }
+                else
+                {
+                    m_output = Mathematics.TanH(m_output);
+                }
             }
         }
-
-		//squash value to a value between 0 and 1
-        public static double Sigmoid(double value)
-        {
-            return 1 / (1 + Math.Exp(-value));
-        }
-
 
     }
 }
