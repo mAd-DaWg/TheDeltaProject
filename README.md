@@ -4,6 +4,9 @@ TheDeltaProject
 Goal:
 Aiming to make an AI similar to JARVIS(from iron man) to control and interact with your pc. 
 
+Update: exploring the use of FANN(homepage: http://leenissen.dk/fann/wp/ github: https://github.com/libfann/fann)
+        as a basis for the neuralnetworks and machine learning, which would save time and effort.
+
 Code:
 Developed in c# using monodevelop(when on linux) or MS Visual Studio(when on windows)
 
