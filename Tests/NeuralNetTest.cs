@@ -337,7 +337,7 @@ namespace TheDeltaProject.Tests
             CalculateUserInput(net, "NOR");
         }
 
-        //NEEDS MOR TESTING! this function runs the NOR test on the Neural Network.
+        //NEEDS MORE TESTING! this function runs the NOR test on the Neural Network.
         private void runXNORtest()
         {
             Console.Clear();
@@ -375,7 +375,7 @@ namespace TheDeltaProject.Tests
             //                   in the Neural Network itself.)
             //   4 hidden layer neurons (the number of neurons in the hidden layer/each hidden layer; requires a minimum of 4 neurons to converge on a XNOR function
             //   1 output neuron (the number of outputs from the network)
-            net.Initialize(1, 2, 1, 10, 1, true);
+            net.Initialize(1, 2, 1, 5, 1, true);
 
             Console.WriteLine();
             Console.WriteLine("Okay, all variables needed for the test have been accounted for!");
@@ -389,7 +389,7 @@ namespace TheDeltaProject.Tests
             {
                 count++;//increas the count of training sessions done by 1
 
-                net.LearningRate = 3;//set the rate that the neural network learns. By default the network has a learning rate of 0.5
+                net.LearningRate = 0.5;//set the rate that the neural network learns. By default the network has a learning rate of 0.5
                 net.Train(input, output, iterations);//do a training session!
 
                 //get the results of training to see if more training is needed! Used by the while statement.
