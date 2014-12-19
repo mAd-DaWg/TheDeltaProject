@@ -39,11 +39,11 @@ namespace TheDeltaProject.Tests
             Console.WriteLine();
             Console.WriteLine("2  NOR - Trains the network to a logic function");
             Console.WriteLine("         Used to test network convergance and accuracy.");
-            //Console.WriteLine();
-            //Console.WriteLine("3  XNOR - Trains the network to an advanced logic function");
-            //Console.WriteLine("         Used to test network convergance and accuracy.");
-            //Console.WriteLine("         Currently broken, use ctrl+c to quit");
-            //Console.WriteLine("---------------------------------------------------------");
+            Console.WriteLine();
+            Console.WriteLine("3  XNOR - Trains the network to an advanced logic function");
+            Console.WriteLine("         Used to test network convergance and accuracy.");
+            Console.WriteLine("         Currently broken, use ctrl+c to quit if 'non responsive'");
+            Console.WriteLine("---------------------------------------------------------");
 
 			while(true)
 			{
@@ -375,7 +375,7 @@ namespace TheDeltaProject.Tests
             //                   in the Neural Network itself.)
             //   4 hidden layer neurons (the number of neurons in the hidden layer/each hidden layer; requires a minimum of 4 neurons to converge on a XNOR function
             //   1 output neuron (the number of outputs from the network)
-            net.Initialize(1, 2, 2, 10, 1, true);
+            net.Initialize(1, 2, 1, 10, 1, true);
 
             Console.WriteLine();
             Console.WriteLine("Okay, all variables needed for the test have been accounted for!");
