@@ -1,6 +1,7 @@
 /* Originally coded and documented by Joshua Gatley-Dewing */
 
 using System;
+using Fann.Net;
 
 namespace TheDeltaProject.Brain
 {
