@@ -1,5 +1,7 @@
 TheDeltaProject
 ===============
+Scrapped for now
+
 
 Goal:
 Aiming to make an AI similar to JARVIS(from iron man) to control and interact with your pc. 
